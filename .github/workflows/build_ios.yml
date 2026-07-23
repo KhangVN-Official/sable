@@ -1,0 +1,21 @@
+name: Build iOS Dylib
+
+on: [workflow_dispatch]
+
+jobs:
+  build:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: aarch64-apple-ios
+      - name: Build
+        run: |
+          cd sable_rapier
+          cargo build --target aarch64-apple-ios --release
+          mv target/aarch64-apple-ios/release/libsable_rapier.dylib libsable_rapier_ios.dylib
+      - uses: actions/upload-artifact@v4
+        with:
+          name: libsable_rapier_ios
+          path: sable_rapier/libsable_rapier_ios.dylib

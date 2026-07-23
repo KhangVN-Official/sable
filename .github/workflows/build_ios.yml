@@ -10,9 +10,10 @@ jobs:
         with:
           submodules: recursive
 
-      - uses: dtolnay/rust-toolchain@stable
-        with:
-          targets: aarch64-apple-ios
+      - name: Install Rust & iOS Target
+        run: |
+          rustup default stable
+          rustup target add aarch64-apple-ios
 
       - name: Locate and Build Rust Native
         run: |
@@ -25,7 +26,7 @@ jobs:
           echo "Found Cargo.toml in: $CARGO_DIR"
           cd "$CARGO_DIR"
           cargo build --target aarch64-apple-ios --release
-          
+
       - name: Package Output
         run: |
           find . -name "*.dylib" -exec cp {} ./libsable_rapier_ios.dylib \;

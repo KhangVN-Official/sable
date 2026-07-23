@@ -7,13 +7,29 @@ jobs:
     runs-on: macos-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
       - uses: dtolnay/rust-toolchain@stable
         with:
           targets: aarch64-apple-ios
-      - name: Build
+
+      - name: Locate and Build Rust Native
         run: |
+          CARGO_PATH=$(find . -name "Cargo.toml" | head -n 1)
+          if [ -z "$CARGO_PATH" ]; then
+            echo "Error: Cargo.toml not found!"
+            exit 1
+          fi
+          CARGO_DIR=$(dirname "$CARGO_PATH")
+          echo "Found Cargo.toml in: $CARGO_DIR"
+          cd "$CARGO_DIR"
           cargo build --target aarch64-apple-ios --release
-          mv target/aarch64-apple-ios/release/libsable_rapier.dylib libsable_rapier_ios.dylib || mv target/aarch64-apple-ios/release/*.dylib libsable_rapier_ios.dylib
+          
+      - name: Package Output
+        run: |
+          find . -name "*.dylib" -exec cp {} ./libsable_rapier_ios.dylib \;
+
       - uses: actions/upload-artifact@v4
         with:
           name: libsable_rapier_ios
